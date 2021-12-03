@@ -4,6 +4,44 @@ import scala.annotation.tailrec
 
 object Day3 {
   object Part1 {
+
+    def bitSolve: IO[Int] = Parser.parse(3).map { strs =>
+      //Length checking
+      val arrayOfStrings = strs.toArray
+      assert(arrayOfStrings.nonEmpty)
+      val bitLength = arrayOfStrings.head.length
+      assert(arrayOfStrings.forall(_.length == bitLength))
+      val arrayOfInts = arrayOfStrings.map(Integer.parseInt(_, 2))
+
+      //Statics
+      val midpoint = (arrayOfInts.length + 1) / 2
+      val intLength = 32
+      val topBitMask = 1 << (intLength - 1) //100000000000...
+
+      //Shift everything over so we only consider top bits.
+      //This also means we can throw away top bits by left shifting
+      //And we can just sort the array by the Int because big endian (or is it little?)
+      val uselessBits = intLength - bitLength
+      arrayOfInts.mapInPlace(_ << uselessBits)
+
+      //Sort the array, get the midpoint value, check the top bit with the mask.
+      //Append the midpoint value, left shift EVERYTHING by 1 to look at the next bit, repeat.
+      var gamma = 0
+      for (_ <- 0 until bitLength) {
+        gamma = gamma << 1
+        arrayOfInts.sortInPlace()
+        val mid = arrayOfInts(midpoint)
+        val mostCommon = if ((mid & topBitMask) == topBitMask) 1 else 0
+        gamma = gamma + mostCommon
+        arrayOfInts.mapInPlace(_ << 1)
+      }
+
+      //Bitwise invert for epsilon, but only keep the bottom bits
+      val bitLengthMask = (1 << bitLength) - 1 //...000000011111
+      val epsilon = (~ gamma) & bitLengthMask
+      gamma * epsilon
+    }
+
     def solve: IO[Int] = Parser.parse(3).map { strs =>
       //Gamma - most common bit at each location
       //Epsilon - least common bit at each location
@@ -43,7 +81,6 @@ object Day3 {
           }
         }
         val left = remaining.filter(_(iteration) == matcher)
-        println(s"$left  -  $iteration  -  $mostOrLeast  -  $matcher")
         if (left.size <= 1) left else rec(left, iteration + 1, mostOrLeast)
       }
 
