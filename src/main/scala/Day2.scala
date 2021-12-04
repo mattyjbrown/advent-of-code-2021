@@ -1,8 +1,7 @@
-import Day2.Part1.Location
 import cats.effect.IO
 import cats.implicits._
 
-object Day2 {
+object Day2 extends Day {
   sealed trait Command
 
   object Command {
@@ -33,8 +32,8 @@ object Day2 {
       }
     }
 
-    def solve: IO[Int] = Parser.parse(2)
-      .flatMap(_.traverse(Command.parse))
+    def solve(strs: Vector[String]): IO[Int] = strs
+      .traverse(Command.parse)
       .map(_.foldLeft(Location(0, 0))(_ move _))
       .map { case Location(x, y) => x * y }
   }
@@ -47,9 +46,15 @@ object Day2 {
         case Command.Down(units) => copy(aim = aim + units)
       }
     }
-    def solve: IO[Int] = Parser.parse(2)
-      .flatMap(_.traverse(Command.parse))
+    def solve(strs: Vector[String]): IO[Int] = strs
+      .traverse(Command.parse)
       .map(_.foldLeft(Sub(0, 0, 0))(_ move _))
       .map { case Sub(_, x, y) => x * y }
   }
+
+  override def day: Int = 2
+
+  override def solve1Impl(strs: Vector[String]): IO[String] = Part1.solve(strs).map(_.toString)
+
+  override def solve2Impl(strs: Vector[String]): IO[String] = Part2.solve(strs).map(_.toString)
 }
