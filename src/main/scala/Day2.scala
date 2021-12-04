@@ -1,30 +1,31 @@
-import Day2.Command
 import cats.effect.IO
 import cats.implicits._
 
-object Day2 extends Day[Vector[Command], Vector[Command]] {
-  sealed trait Command
+sealed trait Command
 
-  object Command {
-    case class Forward(units: Int) extends Command
+object Command {
+  case class Forward(units: Int) extends Command
 
-    case class Up(units: Int) extends Command
+  case class Up(units: Int) extends Command
 
-    case class Down(units: Int) extends Command
+  case class Down(units: Int) extends Command
 
-    def parse(string: String): IO[Command] = {
-      (for {
-        units <- string.last.toString.toIntOption
-        command <- string.takeWhile(_ != ' ') match {
-          case "forward" => Forward(units).some
-          case "up"      => Up(units).some
-          case "down"    => Down(units).some
-          case _         => None
-        }
-      } yield command)
-        .liftTo[IO](new IllegalArgumentException(s"Couldn't parse $string"))
-    }
+  def parse(string: String): IO[Command] = {
+    (for {
+      units <- string.last.toString.toIntOption
+      command <- string.takeWhile(_ != ' ') match {
+        case "forward" => Forward(units).some
+        case "up"      => Up(units).some
+        case "down"    => Down(units).some
+        case _         => None
+      }
+    } yield command)
+      .liftTo[IO](new IllegalArgumentException(s"Couldn't parse $string"))
   }
+}
+
+object Day2 extends Day[Vector[Command], Vector[Command]] {
+
   object Part1 {
     case class Location(x: Int, y: Int) {
       def move(command: Command): Location = command match {
