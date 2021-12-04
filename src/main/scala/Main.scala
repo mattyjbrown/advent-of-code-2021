@@ -1,20 +1,26 @@
 import cats.effect.{IO, IOApp}
 
 object Main extends IOApp.Simple {
-  override def run: IO[Unit] =
+  override def run: IO[Unit] = {
+    val day: Day = Day4
     for {
       _ <- IO.println("Hello, World!")
-      pt1 <- Day3.Part1.solve
-      _ <- IO.println(s"Day 3, Part 1: $pt1")
-      pt2 <- Day3.Part2.solve
-      _ <- IO.println(s"Day 3, Part 2: $pt2")
+      pt1 <- day.solve1
+      _ <- IO.println(s"Day ${day.day}, Part 1: $pt1")
+      pt2 <- day.solve2
+      _ <- IO.println(s"Day ${day.day}, Part 2: $pt2")
     } yield ()
+  }
 }
 
-trait Day {
-    def day: Int
-    def solve1: IO[String] = Parser.parse(day).flatMap(solve1Impl)
-    def solve1Impl(strs: Vector[String]): IO[String]
-    def solve2: IO[String] = Parser.parse(day).flatMap(solve2Impl)
-    def solve2Impl(strs: Vector[String]): IO[String]
+trait Day[T1, T2] {
+  def day: Int
+  def solve1: IO[String] =
+    FileReader.read(day).flatMap(parse1).flatMap(solve1Impl)
+  def parse1(strs: Vector[String]): IO[T1]
+  def solve1Impl(input: T1): IO[String]
+  def solve2: IO[String] =
+    FileReader.read(day).flatMap(parse2).flatMap(solve2Impl)
+  def parse2(strs: Vector[String]): IO[T2]
+  def solve2Impl(input: T2): IO[String]
 }
