@@ -58,10 +58,6 @@ object Day9 extends Day[Grid, Grid] {
 
   override def parse2(strs: Vector[String]): IO[Grid] = parse1(strs)
 
-  /**
-    * So the basin is the low point, then you need to fan out over the neighbours and keep the coords where the value is higher but not 9.
-    * Then at the end, let's assert that all point is in once apart from the 9s
-    */
   override def solve2Impl(input: Grid): IO[String] = {
     def rec(point: Coords): Vector[Coords] = {
       val height = input.at(point).get
