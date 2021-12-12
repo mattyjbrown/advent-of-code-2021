@@ -1,43 +1,45 @@
-import cats.CommutativeFlatMap.ops.toAllCommutativeFlatMapOps
 import cats.effect.IO
 import cats.implicits._
 import com.softwaremill.quicklens._
+import Day9Utils._
 
-case class Coords(x: Int, y: Int)
-case class Grid(grid: Vector[Vector[Int]]) {
-  require(grid.forall(_.length == grid.head.length))
-  val size: Coords = Coords(grid.length, grid.head.length)
-  val all: Vector[Coords] =
-    (for {
-      x <- 0 until size.x
-      y <- 0 until size.y
-    } yield Coords(x, y)).to(Vector)
+object Day9Utils {
+  case class Coords(x: Int, y: Int)
+  case class Grid(grid: Vector[Vector[Int]]) {
+    require(grid.forall(_.length == grid.head.length))
+    val size: Coords = Coords(grid.length, grid.head.length)
+    val all: Vector[Coords] =
+      (for {
+        x <- 0 until size.x
+        y <- 0 until size.y
+      } yield Coords(x, y)).to(Vector)
 
-  def at(coords: Coords): Option[Int] = at(coords.x, coords.y)
+    def at(coords: Coords): Option[Int] = at(coords.x, coords.y)
 
-  def at(x: Int, y: Int): Option[Int] =
-    for {
-      row <- grid.lift(x)
-      cell <- row.lift(y)
-    } yield cell
+    def at(x: Int, y: Int): Option[Int] =
+      for {
+        row <- grid.lift(x)
+        cell <- row.lift(y)
+      } yield cell
 
-  def neighbours(coords: Coords): Vector[Coords] =
-    Vector(
-      coords.modify(_.x).using(_ + 1),
-      coords.modify(_.x).using(_ - 1),
-      coords.modify(_.y).using(_ + 1),
-      coords.modify(_.y).using(_ - 1)
-    ).filter(at(_).isDefined) //lazy
+    def neighbours(coords: Coords): Vector[Coords] =
+      Vector(
+        coords.modify(_.x).using(_ + 1),
+        coords.modify(_.x).using(_ - 1),
+        coords.modify(_.y).using(_ + 1),
+        coords.modify(_.y).using(_ - 1)
+      ).filter(at(_).isDefined) //lazy
 
-  def lowPoints: Vector[Coords] =
-    all
-      .map(coords => coords -> neighbours(coords))
-      .filter {
-        case (coords, neighbours) =>
-          val height = at(coords).get
-          neighbours.flatMap(at).forall(_ > height)
-      }
-      .map(_._1)
+    def lowPoints: Vector[Coords] =
+      all
+        .map(coords => coords -> neighbours(coords))
+        .filter {
+          case (coords, neighbours) =>
+            val height = at(coords).get
+            neighbours.flatMap(at).forall(_ > height)
+        }
+        .map(_._1)
+  }
 }
 
 object Day9 extends Day[Grid, Grid] {
