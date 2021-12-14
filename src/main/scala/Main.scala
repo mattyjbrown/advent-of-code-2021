@@ -2,7 +2,7 @@ import cats.effect.{IO, IOApp}
 
 object Main extends IOApp.Simple {
   override def run: IO[Unit] = {
-    val day = Day12
+    val day = Day14
     for {
       _ <- IO.println("Hello, World!")
       pt1 <- day.solve1
