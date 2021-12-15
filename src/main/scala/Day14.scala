@@ -56,5 +56,34 @@ object Day14 extends Day[Input, Input] {
 
   override def parse2(strs: Vector[String]): IO[Input] = parse1(strs)
 
-  override def solve2Impl(input: Input): IO[String] = ???
+  /**
+    * So just bumping part 1 to 40 steps OOMed after step 22 or so.
+    * Would it help if we were to just consider a single pair at time?
+    * Like if your first pair is NN, you can do that for 40 steps, throw away all the garbage, keep the counts
+    * and move on to the next pair.
+    * No luck, still only made it to step 27.
+    *
+    * What about if you take each pair and do 10 iterations on it?
+    * Then put that in a map of pair -> count of resulting pairs.
+    * Find every possible char pair in our input.
+    * Do 10 iterations of each and count the number of resulting pairs
+    *
+    * Got so confused by that I got lost, no thanks.
+    * Pair counting!
+    * Count all the pairs in the initial string, each of them will be mapped by the config to either itself or a pair-of-pairs.
+    * Because the new element always goes in the middle, you don't affect the other pairs.
+    * So you either put into the new map the same number again, or double that number of the new pair
+    */
+  override def solve2Impl(input: Input): IO[String] = {
+    val initialCounts: Map[String, Int] =
+      input._1.sliding(2).toList.groupMapReduce(identity)(_ => 1)(_ + _)
+    val insertRules: Map[String, (String, String)] = {
+      val charMap = input._2.map(r => r.pair -> r.insert).toMap
+      charMap.map { case ((a, b), out) => s"$a$b" -> (s"$a$out" -> s"$out$b") }
+    }
+    val insertRule: String => List[String] = pairString => ins
+    val step: State[Map[String, Int], Unit] = State.modify { pairCounts =>
+      pairCounts.keys
+    }
+  }
 }
